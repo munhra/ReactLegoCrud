@@ -46,7 +46,7 @@ class LegoPartsNavbar extends React.Component {
   }
 
   handleAddLegoPartSave() {
-    console.log('handleAddLegoPartSave')
+    console.log('handleAddLegoPartSave createLegoPartFromAPI')
     this.setState({isAddLegoPart: false, isDeleteLegoParts: false})
   }
 
@@ -124,7 +124,12 @@ class LegoPartDeleteModal extends React.Component {
   render() {
     return (
       <Modal show={this.props.isDeleteLegoPart}>
-        <Modal.Title>Delete Lego Part</Modal.Title>
+        <Modal.Header>
+          <Modal.Title>Delete Lego Part</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p> Delete Message </p>
+        </Modal.Body>
         <Modal.Footer>
           <Button variant='secondary' onClick={() => this.handleClose()}>Cancel</Button>
           <Button variant='primary' onClick={() => this.handleDelete()}>Delete</Button>
@@ -135,22 +140,78 @@ class LegoPartDeleteModal extends React.Component {
 }
 
 class LegoPartsCreateOrEditModal extends React.Component {
+  constructor(props) {
+    super(props)
+    this.service = new Service()
+    this.state = {legoPart: {name:'', description:'', part_number: '', color: '', image: '', quantity: 0}}
+  }
+
+  async createLegoPart() {
+    try {
+      let legoPartJSONString = JSON.stringify(this.state.value)
+      let legoParts = await this.service.createLegoPartFromAPI(legoPartJSONString)
+      console.log('**** add part with success ' + JSON.stringify(legoParts))
+    } catch (error) {
+      // error dialog
+      console.log('**** add part with error '+error)
+    }
+  }
+
+  handleChange(event) {
+    this.setState({legoPart: {...this.state.legoPart, [event.target.id]: event.target.value}})
+  }
+
   handleClose() {
     this.props.handleAddLegoPartClose()
   }
 
-  handleSave() {
+  async handleSave() {
+    // call service to add lego part createLegoPartFromAPI
+    // shows the active indicator
+    // control error state with setState
+    await this.createLegoPart()
+    // if an error happen this could not be called.
     this.props.handleAddLegoPartSave()
   }
 
   render() {
     return (
       <Modal show={this.props.isAddLegoPart}>
-        <Modal.Title>Add Lego Part</Modal.Title>
-        <Modal.Footer>
-          <Button variant='secondary' onClick={() => this.handleClose()}>Cancel</Button>
-          <Button variant='primary' onClick={() => this.handleSave()}>Save changes</Button>
-        </Modal.Footer>
+        <Modal.Header>
+          <Modal.Title>Add Lego Part</Modal.Title>
+        </Modal.Header>
+        <Form>
+          <Modal.Body>
+            <Form.Group controlId='name'>
+              <Form.Label>Name</Form.Label>
+              <Form.Control type='text' value={this.state.legoPart.name} onChange={event => this.handleChange(event)}/>
+            </Form.Group>
+            <Form.Group controlId='description'>
+              <Form.Label>Description</Form.Label>
+              <Form.Control type='text' value={this.state.legoPart.description} onChange={event => this.handleChange(event)}/>
+            </Form.Group>
+            <Form.Group controlId='part_number'>
+              <Form.Label>Part Number</Form.Label>
+              <Form.Control type='text' value={this.state.legoPart.part_number} onChange={event => this.handleChange(event)}/>
+            </Form.Group>
+            <Form.Group controlId='quantity'>
+              <Form.Label>Quantity</Form.Label>
+              <Form.Control type='text' value={this.state.legoPart.quantity} onChange={event => this.handleChange(event)}/>
+            </Form.Group>
+            <Form.Group controlId='color'>
+              <Form.Label>Color</Form.Label>
+              <Form.Control type='text' value={this.state.legoPart.color} onChange={event => this.handleChange(event)}/>
+            </Form.Group>
+            <Form.Group controlId='image'>
+              <Form.Label>Image</Form.Label>
+              <Form.Control type='text' value={this.state.legoPart.image} onChange={event => this.handleChange(event)}/>
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant='secondary' onClick={() => this.handleClose()}>Cancel</Button>
+            <Button variant='primary' onClick={() => this.handleSave()}>Save changes</Button>
+          </Modal.Footer>
+        </Form>
       </Modal>
     )
   }

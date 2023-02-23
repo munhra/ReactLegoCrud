@@ -14,15 +14,17 @@ class Service {
     }
   }
 
+  // it is strage because only the id is returned not the complete object tentei colocar o accept
   async createLegoPartFromAPI (legoPartJSONString) {
     const response = await fetch(productionURL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json','Accept': '*/*'},
       mode: 'cors',
       body: legoPartJSONString
     })
     if (response.ok) {
       const createdLegoPart = await response.json()
+      console.log("createLegoPartFromAPI respons -> "+createdLegoPart.name)
       return createdLegoPart
     } else {
       throw new Error('Server Error when createLegoPart')
