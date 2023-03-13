@@ -24,7 +24,7 @@ class Service {
     })
     if (response.ok) {
       const createdLegoPart = await response.json()
-      console.log("createLegoPartFromAPI respons -> "+createdLegoPart.name)
+      console.log("createLegoPartFromAPI response -> "+createdLegoPart.name)
       return createdLegoPart
     } else {
       throw new Error('Server Error when createLegoPart')

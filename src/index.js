@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Modal, Form, Navbar, Table } from 'react-bootstrap';
+import { Toast, Button, Modal, Form, Navbar, Table, Spinner, ToastContainer } from 'react-bootstrap';
 import { Service } from './service';
 import { Utilities } from './utilities';
 import './index.css';
@@ -11,7 +11,6 @@ class LegoPartsCRUD extends React.Component {
     return (
       <>
         <LegoPartsNavbar />
-        <LegoPartsTable />
       </>
     )
   }
@@ -21,11 +20,8 @@ class LegoPartsNavbar extends React.Component {
   constructor(props) {
     super(props)
     this.state = {isAddLegoPart: false, isDeleteLegoParts: false}
-
-    // With the bind() method, an object can borrow a method from another object.
     this.handleAddLegoPartClose = this.handleAddLegoPartClose.bind(this)
     this.handleAddLegoPartSave = this.handleAddLegoPartSave.bind(this)
-
     this.handleDeleteLegoPartClose = this.handleDeleteLegoPartClose.bind(this)
     this.handleDeleteLegoPartSave = this.handleDeleteLegoPartSave.bind(this)
   }
@@ -97,6 +93,7 @@ class LegoPartsNavbar extends React.Component {
       </Navbar>
       {addLegoPartModal}
       {deleteLegoPartModal}
+      <LegoPartsTable />
       </>
     )
   }
@@ -143,18 +140,8 @@ class LegoPartsCreateOrEditModal extends React.Component {
   constructor(props) {
     super(props)
     this.service = new Service()
-    this.state = {legoPart: {name:'', description:'', part_number: '', color: '', image: '', quantity: 0}}
-  }
-
-  async createLegoPart() {
-    try {
-      let legoPartJSONString = JSON.stringify(this.state.value)
-      let legoParts = await this.service.createLegoPartFromAPI(legoPartJSONString)
-      console.log('**** add part with success ' + JSON.stringify(legoParts))
-    } catch (error) {
-      // error dialog
-      console.log('**** add part with error '+error)
-    }
+    this.state = {legoPart: {name:'', description:'', part_number: '', color: '', image: '', quantity: 0}, 
+                  isSpinnerVisible: false, showInfoToast: false, messageWhenAddingLegoPart: 'Lego part created with success.'}
   }
 
   handleChange(event) {
@@ -166,19 +153,42 @@ class LegoPartsCreateOrEditModal extends React.Component {
   }
 
   async handleSave() {
-    // call service to add lego part createLegoPartFromAPI
-    // shows the active indicator
-    // control error state with setState
-    await this.createLegoPart()
-    // if an error happen this could not be called.
-    this.props.handleAddLegoPartSave()
+    try {
+      this.setState({isSpinnerVisible: true})
+      let legoPartJSONString = JSON.stringify(this.state.legoPart)
+      console.log(legoPartJSONString)
+      await this.service.createLegoPartFromAPI(legoPartJSONString)
+      this.setState({showInfoToast: true}, () => {
+          setTimeout(() => {
+            this.props.handleAddLegoPartSave()
+          }, 3000)
+        }
+      )
+    } catch (error) {
+      this.setState({isSpinnerVisible: false, showInfoToast: true, messageWhenAddingLegoPart: 'Error when creating lego part.'})
+    }
+  }
+
+  hideInfoToast() {
+    this.setState({showInfoToast: false})
   }
 
   render() {
+    let spinner
+  
+    if (this.state.isSpinnerVisible) {
+      spinner = 
+      <Spinner animation='border' role='status'>
+        <span className='visually-hidden'>Loading...</span>
+      </Spinner>
+    }
+
     return (
+      <>
       <Modal show={this.props.isAddLegoPart}>
         <Modal.Header>
           <Modal.Title>Add Lego Part</Modal.Title>
+          {spinner}
         </Modal.Header>
         <Form>
           <Modal.Body>
@@ -213,6 +223,17 @@ class LegoPartsCreateOrEditModal extends React.Component {
           </Modal.Footer>
         </Form>
       </Modal>
+      <ToastContainer className='p-3' position='bottom-end'>
+        <Toast onClose={() => this.hideInfoToast()} show={this.state.showInfoToast} delay={2000} autohide>
+          <Toast.Header>
+            LegoPart 
+          </Toast.Header>
+          <Toast.Body>
+            {this.state.messageWhenAddingLegoPart}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
+    </>
     )
   }
 }
