@@ -27,32 +27,28 @@ class LegoPartsNavbar extends React.Component {
   }
 
   deleteLegoParts() {
-    console.log('Delete lego part !!')
     this.setState({isDeleteLegoParts: true})
   }
 
   addLegoPart() {
-    console.log('Add lego part !!')
     this.setState({isAddLegoPart: true})
   }
 
   handleAddLegoPartClose() {
-    console.log('handleAddLegoPartClose')
-    this.setState({isAddLegoPart: false, isDeleteLegoParts: false})
+    this.setState({isAddLegoPart: false})
   }
 
-  handleAddLegoPartSave() {
-    console.log('handleAddLegoPartSave createLegoPartFromAPI')
-    this.setState({isAddLegoPart: false, isDeleteLegoParts: false})
+  async handleAddLegoPartSave() {
+    let legoParts = await fetchAllLegoPartsFromAPI()
+    // implement error handling for this
+    this.setState({isAddLegoPart: false, legoParts: legoParts})
   }
 
   handleDeleteLegoPartClose() {
-    console.log('handleDeleteLegoPartClose')
-    this.setState({isAddLegoPart: false, isDeleteLegoParts: false})
+    this.setState({isDeleteLegoParts: false})
   }
 
   handleDeleteLegoPartSave() {
-    console.log('handleDeleteLegoPartSave')
     this.setState({isAddLegoPart: false, isDeleteLegoParts: false})
   }
 
@@ -93,45 +89,86 @@ class LegoPartsNavbar extends React.Component {
       </Navbar>
       {addLegoPartModal}
       {deleteLegoPartModal}
-      <LegoPartsTable />
+      <LegoPartsTable legoParts={this.state.legoParts}/>
       </>
     )
   }
 }
 
 class LegoPartDeleteModal extends React.Component {
-
-  componentDidMount() {
-    console.log('LegoPartDeleteModal componentDidMount !!!')
+  constructor(props) {
+    super()
+    this.service = new Service()
+    this.state = {isSpinnerVisible: false, showInfoToast: false, messageWhenDeletingLegoPart: 'Lego part deleted with success.'}
   }
 
-  componentWillUnmount() {
-    console.log('LegoPartDeleteModal componentWillUnmount !!!')
+  componentDidMount() { 
+    console.log('componentDidMount LegoPartDeleteModal showInfoToast '+this.state.showInfoToast)
+  }
+
+  componentWillUnmount() { 
+    console.log('componentWillUnmount LegoPartDeleteModal '+this.state.showInfoToast)
   }
 
   handleClose() {
     this.props.handleDeleteLegoPartClose()
   }
 
-  handleDelete() {
-    console.log('##### handleDelete LegoPartDeleteModal ######')
+  hideInfoToast() {
+    this.setState({showInfoToast: false})
     this.props.handleDeleteLegoPartSave()
   }
 
+  async handleDelete() {
+    try {
+      this.setState({isSpinnerVisible: true})
+      await this.service.deleteLegoPartFromAPI(this.props.legoPartToDelete.id)
+      this.setState({showInfoToast: true})
+    } catch (error) {
+      this.setState({isSpinnerVisible: false, showInfoToast: true, messageWhenDeletingLegoPart: 'Error when deleting lego part.'})
+    }
+  }
+
   render() {
+    console.log('render show info toast '+this.state.showInfoToast)
+    let spinner
+    let footer
+    if (this.state.isSpinnerVisible) {
+      spinner = 
+      <Spinner animation='border' role='status'>
+        <span className='visually-hidden'>Loading...</span>
+      </Spinner>
+    } else {
+      footer = 
+      <Modal.Footer>
+        <Button variant='secondary' onClick={() => this.handleClose()}>Cancel</Button>
+        <Button variant='primary' onClick={() => this.handleDelete()}>Delete</Button>
+    </Modal.Footer>
+    }
+
     return (
+    <>
+      <ToastContainer position='bottom-end'>
+        <Toast onClose={() => this.hideInfoToast()} show={this.state.showInfoToast} delay={2000} autohide>
+          <Toast.Header>
+            LegoPart 
+          </Toast.Header>
+          <Toast.Body>
+            {this.state.messageWhenDeletingLegoPart}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
       <Modal show={this.props.isDeleteLegoPart}>
         <Modal.Header>
           <Modal.Title>Delete Lego Part</Modal.Title>
+          {spinner}
         </Modal.Header>
         <Modal.Body>
-          <p> Delete Message </p>
+          <p> Are you sure to delete lego part "{this.props.legoPartToDelete.name}"</p>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant='secondary' onClick={() => this.handleClose()}>Cancel</Button>
-          <Button variant='primary' onClick={() => this.handleDelete()}>Delete</Button>
-        </Modal.Footer>
+        {footer}
       </Modal>
+    </>
     )
   }
 }
@@ -158,12 +195,7 @@ class LegoPartsCreateOrEditModal extends React.Component {
       let legoPartJSONString = JSON.stringify(this.state.legoPart)
       console.log(legoPartJSONString)
       await this.service.createLegoPartFromAPI(legoPartJSONString)
-      this.setState({showInfoToast: true}, () => {
-          setTimeout(() => {
-            this.props.handleAddLegoPartSave()
-          }, 3000)
-        }
-      )
+      this.setState({showInfoToast: true})
     } catch (error) {
       this.setState({isSpinnerVisible: false, showInfoToast: true, messageWhenAddingLegoPart: 'Error when creating lego part.'})
     }
@@ -171,16 +203,24 @@ class LegoPartsCreateOrEditModal extends React.Component {
 
   hideInfoToast() {
     this.setState({showInfoToast: false})
+    this.props.handleAddLegoPartSave()
   }
 
   render() {
     let spinner
-  
+    let footer
+
     if (this.state.isSpinnerVisible) {
       spinner = 
       <Spinner animation='border' role='status'>
         <span className='visually-hidden'>Loading...</span>
       </Spinner>
+    } else {
+      footer = 
+      <Modal.Footer>
+        <Button variant='secondary' onClick={() => this.handleClose()}>Cancel</Button>
+        <Button variant='primary' onClick={() => this.handleSave()}>Save changes</Button>
+      </Modal.Footer>
     }
 
     return (
@@ -217,10 +257,7 @@ class LegoPartsCreateOrEditModal extends React.Component {
               <Form.Control type='text' value={this.state.legoPart.image} onChange={event => this.handleChange(event)}/>
             </Form.Group>
           </Modal.Body>
-          <Modal.Footer>
-            <Button variant='secondary' onClick={() => this.handleClose()}>Cancel</Button>
-            <Button variant='primary' onClick={() => this.handleSave()}>Save changes</Button>
-          </Modal.Footer>
+            {footer}
         </Form>
       </Modal>
       <ToastContainer className='p-3' position='bottom-end'>
@@ -241,18 +278,26 @@ class LegoPartsCreateOrEditModal extends React.Component {
 class LegoPartsTable extends React.Component {
   constructor() {
     super()
-    this.state = {legoParts: []}
+    this.state = {legoParts: [], legoPartToDelete: {}}
     this.service = new Service()
     this.utilities = new Utilities()
+
+    this.handleDeleteLegoPartClose = this.handleDeleteLegoPartClose.bind(this)
+    this.handleDeleteLegoPartSave = this.handleDeleteLegoPartSave.bind(this)
   }
 
   async componentDidMount() {
-    try {
-      let legoParts = await this.service.getAllLegoPartsFromAPI()
-      this.utilities.sortLegoPartNumbers(legoParts)
-      this.setState({legoParts: legoParts})
-    } catch (error) {
-      // error dialog
+    let legoParts = await fetchAllLegoPartsFromAPI()
+    // error handling needs to be implemented
+    this.setState({legoParts: legoParts})
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.legoParts === undefined) {
+      return null
+    }
+    return {
+      legoParts: nextProps.legoParts
     }
   }
 
@@ -260,8 +305,8 @@ class LegoPartsTable extends React.Component {
     console.log('Edit lego part !!')
   }
 
-  deleteLegoPart() {
-    console.log('Delete lego part !!')
+  deleteLegoPart(legoPart) {
+    this.setState({isDeleteLegoPart: true, legoPartToDelete: legoPart})
   }
 
   selectLegoPartOnClick(event) {
@@ -272,8 +317,33 @@ class LegoPartsTable extends React.Component {
     console.log('Select all lego parts on click !! '+event.target.checked)
   }
 
+  handleDeleteLegoPartClose() {
+    console.log('handleDeleteLegoPartClose')
+    this.setState({isDeleteLegoPart: false})
+  }
+
+  async handleDeleteLegoPartSave() {
+    let legoParts = await fetchAllLegoPartsFromAPI()
+    console.log('handleDeleteLegoPartSave '+legoParts.length)
+    // it is strange but it is not updating the table, it seams that render method is not called
+    // implement error handling for this
+    // after the setstate the array is not correclty updated inside render method
+    this.setState({legoParts: legoParts, isDeleteLegoPart: false})
+  }
+
   render() {
+    console.log('LegoPartsTable call render '+this.state.legoParts.length)
+    let deleteLegoPartModal
+    if (this.state.isDeleteLegoPart) {
+      deleteLegoPartModal = <LegoPartDeleteModal
+        legoPartToDelete={this.state.legoPartToDelete}
+        isDeleteLegoPart={this.state.isDeleteLegoPart}
+        handleDeleteLegoPartClose={this.handleDeleteLegoPartClose}
+        handleDeleteLegoPartSave={this.handleDeleteLegoPartSave}
+      />
+    }
     return(
+      <>
       <Table className='table table-striped table-hover'>
         <thead>
           <tr>
@@ -303,13 +373,29 @@ class LegoPartsTable extends React.Component {
               <td>{legoPart.image}</td>
               <td>
                 <Button variant='warning' size='sm' onClick={() => this.editLegoPart()}>Edit</Button>
-                <Button variant='danger' size='sm' onClick={() => this.deleteLegoPart()}>Delete</Button>
+                <Button variant='danger' size='sm' onClick={() => this.deleteLegoPart(legoPart)}>Delete</Button>
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
+      {deleteLegoPartModal}
+      </>
     )
+  }
+}
+
+export async function fetchAllLegoPartsFromAPI() {
+  let service = new Service()
+  let utilities = new Utilities()
+  try {
+    let legoParts = await service.getAllLegoPartsFromAPI()
+    utilities.sortLegoPartNumbers(legoParts)
+    console.log('fetchAllLegoPartsFromAPI success '+legoParts.length)
+    return legoParts
+  } catch (error) {
+    console.log('fetchAllLegoPartsFromAPI error')
+    return error
   }
 }
 
