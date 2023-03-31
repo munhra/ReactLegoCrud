@@ -48,8 +48,9 @@ class LegoPartsNavbar extends React.Component {
     this.setState({isDeleteLegoParts: false})
   }
 
-  handleDeleteLegoPartSave() {
-    this.setState({isAddLegoPart: false, isDeleteLegoParts: false})
+  async handleDeleteLegoPartSave() {
+    let legoParts = await fetchAllLegoPartsFromAPI()
+    this.setState({isAddLegoPart: false, isDeleteLegoParts: false, legoParts: legoParts})
   }
 
   render() {
@@ -89,7 +90,7 @@ class LegoPartsNavbar extends React.Component {
       </Navbar>
       {addLegoPartModal}
       {deleteLegoPartModal}
-      <LegoPartsTable legoParts={this.state.legoParts}/>
+      <LegoPartsTable legoParts={this.state.legoParts} handleDeleteLegoPartSave={this.handleDeleteLegoPartSave} />
       </>
     )
   }
@@ -306,6 +307,7 @@ class LegoPartsTable extends React.Component {
   }
 
   deleteLegoPart(legoPart) {
+    console.log('deleteLegoPart')
     this.setState({isDeleteLegoPart: true, legoPartToDelete: legoPart})
   }
 
@@ -323,16 +325,14 @@ class LegoPartsTable extends React.Component {
   }
 
   async handleDeleteLegoPartSave() {
-    let legoParts = await fetchAllLegoPartsFromAPI()
-    console.log('handleDeleteLegoPartSave '+legoParts.length)
-    // it is strange but it is not updating the table, it seams that render method is not called
-    // implement error handling for this
-    // after the setstate the array is not correclty updated inside render method
-    this.setState({legoParts: legoParts, isDeleteLegoPart: false})
+    // let legoParts = await fetchAllLegoPartsFromAPI()
+    this.setState({isDeleteLegoPart: false})
+    this.props.handleDeleteLegoPartSave()
   }
 
   render() {
     console.log('LegoPartsTable call render '+this.state.legoParts.length)
+    console.log('LegoPartsTable call isDeleteLegoPart '+this.state.isDeleteLegoPart)
     let deleteLegoPartModal
     if (this.state.isDeleteLegoPart) {
       deleteLegoPartModal = <LegoPartDeleteModal
