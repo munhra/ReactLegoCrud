@@ -6,6 +6,13 @@ import { Service } from './service';
 import { Utilities } from './utilities';
 import './index.css';
 
+// TODO toast when saving edit is not appearing
+// TODO split this file into others by component, or check for other approach
+// TODO unit tests
+// TODO E2E tests
+// TODO implement error handling
+// TODO install lint
+
 class LegoPartsCRUD extends React.Component {
   render() {
     return (
@@ -20,10 +27,14 @@ class LegoPartsNavbar extends React.Component {
   constructor(props) {
     super(props)
     this.state = {isAddLegoPart: false, isDeleteLegoParts: false}
+
     this.handleAddLegoPartClose = this.handleAddLegoPartClose.bind(this)
     this.handleAddLegoPartSave = this.handleAddLegoPartSave.bind(this)
+
     this.handleDeleteLegoPartClose = this.handleDeleteLegoPartClose.bind(this)
     this.handleDeleteLegoPartSave = this.handleDeleteLegoPartSave.bind(this)
+
+    this.handleEditLegoPartSave = this.handleEditLegoPartSave.bind(this)
   }
 
   deleteLegoParts() {
@@ -38,9 +49,19 @@ class LegoPartsNavbar extends React.Component {
     this.setState({isAddLegoPart: false})
   }
 
+  // maybe both methods handleAddLegoPartSave and handleEditLegoPartSave can be merged in one method called
+  // updateLegoTable
+
   async handleAddLegoPartSave() {
     let legoParts = await fetchAllLegoPartsFromAPI()
     // implement error handling for this
+    this.setState({isAddLegoPart: false, legoParts: legoParts})
+  }
+
+  async handleEditLegoPartSave() {
+    let legoParts = await fetchAllLegoPartsFromAPI()
+    // implement error handling for this
+    // i think that isAddLegoPart is not required
     this.setState({isAddLegoPart: false, legoParts: legoParts})
   }
 
@@ -59,9 +80,10 @@ class LegoPartsNavbar extends React.Component {
 
     if (this.state.isAddLegoPart) {
       addLegoPartModal = <LegoPartsCreateOrEditModal 
-        isAddLegoPart={this.state.isAddLegoPart} 
-        handleAddLegoPartClose={this.handleAddLegoPartClose}
-        handleAddLegoPartSave={this.handleAddLegoPartSave}
+      showLegoPartForm = {this.state.isAddLegoPart} 
+        handleAddLegoPartClose = {this.handleAddLegoPartClose}
+        handleAddLegoPartSave = {this.handleAddLegoPartSave}
+        isEditMode = {false}
       />
     }
 
@@ -90,7 +112,10 @@ class LegoPartsNavbar extends React.Component {
       </Navbar>
       {addLegoPartModal}
       {deleteLegoPartModal}
-      <LegoPartsTable legoParts={this.state.legoParts} handleDeleteLegoPartSave={this.handleDeleteLegoPartSave} />
+      <LegoPartsTable legoParts = {this.state.legoParts} 
+                      handleDeleteLegoPartSave = {this.handleDeleteLegoPartSave} 
+                      handleEditLegoPartSave = {this.handleEditLegoPartSave}
+        />
       </>
     )
   }
@@ -101,14 +126,6 @@ class LegoPartDeleteModal extends React.Component {
     super()
     this.service = new Service()
     this.state = {isSpinnerVisible: false, showInfoToast: false, messageWhenDeletingLegoPart: 'Lego part deleted with success.'}
-  }
-
-  componentDidMount() { 
-    console.log('componentDidMount LegoPartDeleteModal showInfoToast '+this.state.showInfoToast)
-  }
-
-  componentWillUnmount() { 
-    console.log('componentWillUnmount LegoPartDeleteModal '+this.state.showInfoToast)
   }
 
   handleClose() {
@@ -178,8 +195,18 @@ class LegoPartsCreateOrEditModal extends React.Component {
   constructor(props) {
     super(props)
     this.service = new Service()
-    this.state = {legoPart: {name:'', description:'', part_number: '', color: '', image: '', quantity: 0}, 
-                  isSpinnerVisible: false, showInfoToast: false, messageWhenAddingLegoPart: 'Lego part created with success.'}
+    console.log("### constructor this.props.isEditMode "+this.props.isEditMode)
+    if (this.props.isEditMode) {
+      this.state = {legoPart: props.legoPartToEdit,
+                    isSpinnerVisible: false,
+                    showInfoToast: false,
+                    messageWhenAddingLegoPart: 'Lego part created with success.'}
+    } else {
+      this.state = {legoPart: {name:'', description:'', part_number: '', color: '', image: '', quantity: 0}, 
+                  isSpinnerVisible: false,
+                  showInfoToast: false,
+                  messageWhenAddingLegoPart: 'Lego part created with success.'}
+    }
   }
 
   handleChange(event) {
@@ -192,14 +219,29 @@ class LegoPartsCreateOrEditModal extends React.Component {
 
   async handleSave() {
     try {
+      console.log('##### this.props.isEditMode '+this.props.isEditMode)
       this.setState({isSpinnerVisible: true})
       let legoPartJSONString = JSON.stringify(this.state.legoPart)
-      console.log(legoPartJSONString)
-      await this.service.createLegoPartFromAPI(legoPartJSONString)
+      if (this.props.isEditMode) {
+        await this.updateLegoPart(legoPartJSONString, this.state.legoPart.id)
+      } else {
+        await this.createLegoPart(legoPartJSONString)
+      }
       this.setState({showInfoToast: true})
     } catch (error) {
-      this.setState({isSpinnerVisible: false, showInfoToast: true, messageWhenAddingLegoPart: 'Error when creating lego part.'})
+      let operation = this.props.isEditMode ? 'editing' : 'creating'
+      this.setState({isSpinnerVisible: false, showInfoToast: true, messageWhenAddingLegoPart: `Error when ${operation} lego part.`})
     }
+  }
+
+  async createLegoPart(legoPartJSONString) {
+    console.log('createLegoPart')
+    this.service.createLegoPartFromAPI(legoPartJSONString)
+  }
+
+  async updateLegoPart(legoPartJSONString, legoPartId) {
+    console.log('updateLegoPart with id '+legoPartId)
+    this.service.updateLegoPartFromAPI(legoPartJSONString, legoPartId)
   }
 
   hideInfoToast() {
@@ -226,7 +268,7 @@ class LegoPartsCreateOrEditModal extends React.Component {
 
     return (
       <>
-      <Modal show={this.props.isAddLegoPart}>
+      <Modal show={this.props.showLegoPartForm}>
         <Modal.Header>
           <Modal.Title>Add Lego Part</Modal.Title>
           {spinner}
@@ -277,14 +319,18 @@ class LegoPartsCreateOrEditModal extends React.Component {
 }
 
 class LegoPartsTable extends React.Component {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {legoParts: [], legoPartToDelete: {}}
     this.service = new Service()
     this.utilities = new Utilities()
 
     this.handleDeleteLegoPartClose = this.handleDeleteLegoPartClose.bind(this)
     this.handleDeleteLegoPartSave = this.handleDeleteLegoPartSave.bind(this)
+
+    // I dont know if handleEditLegoPartClose is necessary
+    this.handleEditLegoPartClose = this.handleEditLegoPartClose.bind(this)
+    this.handleEditLegoPartSave = this.handleEditLegoPartSave.bind(this)
   }
 
   async componentDidMount() {
@@ -302,8 +348,9 @@ class LegoPartsTable extends React.Component {
     }
   }
 
-  editLegoPart() {
-    console.log('Edit lego part !!')
+  editLegoPart(legoPart) {
+    console.log('Edit lego part !! '+legoPart.name)
+    this.setState({isEditLegoPart: true, legoPartToEdit: legoPart})
   }
 
   deleteLegoPart(legoPart) {
@@ -325,21 +372,38 @@ class LegoPartsTable extends React.Component {
   }
 
   async handleDeleteLegoPartSave() {
-    // let legoParts = await fetchAllLegoPartsFromAPI()
     this.setState({isDeleteLegoPart: false})
     this.props.handleDeleteLegoPartSave()
   }
 
+  handleEditLegoPartClose() {
+    this.setState({isEditLegoPart: false})
+  }
+
+  handleEditLegoPartSave() {
+    this.setState({isEditLegoPart: false})
+    this.props.handleEditLegoPartSave()
+  }
+
   render() {
-    console.log('LegoPartsTable call render '+this.state.legoParts.length)
-    console.log('LegoPartsTable call isDeleteLegoPart '+this.state.isDeleteLegoPart)
     let deleteLegoPartModal
+    let editLegoPartModal
+
     if (this.state.isDeleteLegoPart) {
       deleteLegoPartModal = <LegoPartDeleteModal
-        legoPartToDelete={this.state.legoPartToDelete}
-        isDeleteLegoPart={this.state.isDeleteLegoPart}
-        handleDeleteLegoPartClose={this.handleDeleteLegoPartClose}
-        handleDeleteLegoPartSave={this.handleDeleteLegoPartSave}
+        legoPartToDelete = {this.state.legoPartToDelete}
+        isDeleteLegoPart = {this.state.isDeleteLegoPart}
+        handleDeleteLegoPartClose = {this.handleDeleteLegoPartClose}
+        handleDeleteLegoPartSave = {this.handleDeleteLegoPartSave}
+      />
+    }
+    if (this.state.isEditLegoPart) {
+      editLegoPartModal = <LegoPartsCreateOrEditModal
+        showLegoPartForm = {this.state.isEditLegoPart}
+        handleAddLegoPartClose = {this.handleEditLegoPartClose}
+        handleAddLegoPartSave = {this.handleEditLegoPartSave}
+        isEditMode = {true}
+        legoPartToEdit = {this.state.legoPartToEdit}
       />
     }
     return(
@@ -372,7 +436,7 @@ class LegoPartsTable extends React.Component {
               <td>{legoPart.color}</td>
               <td>{legoPart.image}</td>
               <td>
-                <Button variant='warning' size='sm' onClick={() => this.editLegoPart()}>Edit</Button>
+                <Button variant='warning' size='sm' onClick={() => this.editLegoPart(legoPart)}>Edit</Button>
                 <Button variant='danger' size='sm' onClick={() => this.deleteLegoPart(legoPart)}>Delete</Button>
               </td>
             </tr>
@@ -380,6 +444,7 @@ class LegoPartsTable extends React.Component {
         </tbody>
       </Table>
       {deleteLegoPartModal}
+      {editLegoPartModal}
       </>
     )
   }
