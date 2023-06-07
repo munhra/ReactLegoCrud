@@ -57,24 +57,24 @@ export class LegoPartsNavbar extends React.Component {
     this.setState({isAddLegoPart: false, isDeleteLegoParts: false, legoParts: legoParts})
   }
 
-  render() {
+  render () {
     let addLegoPartModal
     let deleteLegoPartModal
 
     if (this.state.isAddLegoPart) {
-      addLegoPartModal = <LegoPartsCreateOrEditModal 
-      showLegoPartForm = {this.state.isAddLegoPart} 
-        handleAddLegoPartClose = {this.handleAddLegoPartClose}
-        handleAddLegoPartSave = {this.handleAddLegoPartSave}
-        isEditMode = {false}
+      addLegoPartModal = <LegoPartsCreateOrEditModal
+                                                     service = {new Service()}
+                                                     showLegoPartForm = {this.state.isAddLegoPart}
+                                                     handleAddLegoPartClose = {this.handleAddLegoPartClose}
+                                                     handleAddLegoPartSave = {this.handleAddLegoPartSave}
+                                                     isEditMode = {false}
       />
     }
 
     if (this.state.isDeleteLegoParts) {
-      deleteLegoPartModal = <LegoPartDeleteModal
-        isDeleteLegoPart={this.state.isDeleteLegoParts}
-        handleDeleteLegoPartClose={this.handleDeleteLegoPartClose}
-        handleDeleteLegoPartSave={this.handleDeleteLegoPartSave}
+      deleteLegoPartModal = <LegoPartDeleteModal isDeleteLegoPart={this.state.isDeleteLegoParts}
+                                                 handleDeleteLegoPartClose={this.handleDeleteLegoPartClose}
+                                                 handleDeleteLegoPartSave={this.handleDeleteLegoPartSave}
       />
     }
     

@@ -1,23 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react'
 import { LegoPartDeleteModal } from '../legoPartDeleteModal'
-import { MockService} from './MockService'
+import { MockService } from './MockService'
 import userEvent from '@testing-library/user-event'
-
-const mockLegoPartToDelete = {
-  id: '1',
-  name: 'Mock Lego Part Name',
-  description: 'Mock Lego Part Description',
-  part_number: '1234567',
-  quantity: 10,
-  color: 'blue',
-  image: 'part.jpg'
-}
 
 it('LegoPartDeleteModal renders successfully', () => {
   render(<LegoPartDeleteModal service = {new MockService()}
-                              isDeleteLegoPart={true} 
-                              legoPartToDelete = {mockLegoPartToDelete}/>)
+                              isDeleteLegoPart={true}
+                              legoPartToDelete = {MockService.mockLegoPart}/>)
 
   const titleText = screen.getByText(/Delete Lego Part/)
   const subTitleText = screen.getByText(/Are you sure to delete lego part "Mock Lego Part Name"/)
@@ -35,7 +25,7 @@ it('LegoPartDeleteModal cancel', async () => {
   render(<LegoPartDeleteModal service = {new MockService()}
                               handleDeleteLegoPartClose={mockHandleDeleteLegoPartClose}
                               isDeleteLegoPart={true}
-                              legoPartToDelete = {mockLegoPartToDelete}/>)
+                              legoPartToDelete = {MockService.mockLegoPart}/>)
 
   const cancelButton = screen.getByText('Cancel')
   expect(cancelButton).toBeInTheDocument()
@@ -49,7 +39,7 @@ it('LegoPartDeleteModal delete with success', async () => {
 
   render(<LegoPartDeleteModal service = {mockedService}
                               isDeleteLegoPart={true}
-                              legoPartToDelete = {mockLegoPartToDelete}/>)
+                              legoPartToDelete = {MockService.mockLegoPart}/>)
 
   const deleteButton = screen.getByText('Delete')
   expect(deleteButton).toBeInTheDocument()
@@ -64,7 +54,7 @@ it('LegoPartDeleteModal delete with error', async () => {
 
   render(<LegoPartDeleteModal service = {mockedService}
                               isDeleteLegoPart={true}
-                              legoPartToDelete = {mockLegoPartToDelete}/>)
+                              legoPartToDelete = {MockService.mockLegoPart}/>)
 
   const deleteButton = screen.getByText('Delete')
   expect(deleteButton).toBeInTheDocument()

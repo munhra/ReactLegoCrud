@@ -86,6 +86,7 @@ export class LegoPartsTable extends React.Component {
     }
     if (this.state.isEditLegoPart) {
       editLegoPartModal = <LegoPartsCreateOrEditModal
+        service = {new Service()}
         showLegoPartForm = {this.state.isEditLegoPart}
         handleAddLegoPartClose = {this.handleEditLegoPartClose}
         handleAddLegoPartSave = {this.handleEditLegoPartSave}

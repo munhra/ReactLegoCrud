@@ -1,17 +1,43 @@
 class MockService {
+  static mockLegoPart = {
+    id: '1',
+    name: 'Mock Lego Part Name',
+    description: 'Mock Lego Part Description',
+    part_number: '1234567',
+    quantity: 10,
+    color: 'blue',
+    image: 'part.jpg'
+  }
+
   isDeleteLegoPartFromAPISuccess = false
   isDeleteLegoPartFromAPIError = false
+
+  isCreateLegoPartFromAPISuccess = false
+  isCreateLegoPartFromAPIError = false
+
+  isUpdateLegoPartFromAPISuccess = false
+  isUpdateLegoPartFromAPIError = false
 
   async getAllLegoPartsFromAPI () {
    
   }
 
   async createLegoPartFromAPI (legoPartJSONString) {
-   
+    if (this.isCreateLegoPartFromAPIError) {
+      throw new Error('Server Error when createLegoPart')
+    } else {
+      this.isCreateLegoPartFromAPISuccess = true
+      return this.mockLegoPartToEdit
+    }
   }
 
   async updateLegoPartFromAPI (legoPartJSONString, legoPartId) {
-    
+    if (this.isUpdateLegoPartFromAPIError) {
+      throw new Error('Server Error when createLegoPart')
+    } else {
+      this.isUpdateLegoPartFromAPISuccess = true
+      return this.mockLegoPartToEdit
+    }
   }
 
   async deleteLegoPartFromAPI (legoPartId) {

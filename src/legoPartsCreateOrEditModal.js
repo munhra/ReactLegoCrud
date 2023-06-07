@@ -1,12 +1,10 @@
 import React from 'react';
 import { Toast, Button, Modal, Form, Navbar, Table, Spinner, ToastContainer } from 'react-bootstrap';
-import { Service } from './service';
 
 export class LegoPartsCreateOrEditModal extends React.Component {
   constructor(props) {
     super(props)
-    this.service = new Service()
-    console.log("### constructor this.props.isEditMode "+this.props.isEditMode)
+    this.service = props.service
     if (this.props.isEditMode) {
       this.state = {legoPart: props.legoPartToEdit,
                     isSpinnerVisible: false,
@@ -30,7 +28,6 @@ export class LegoPartsCreateOrEditModal extends React.Component {
 
   async handleSave() {
     try {
-      console.log('##### this.props.isEditMode '+this.props.isEditMode)
       this.setState({isSpinnerVisible: true})
       let legoPartJSONString = JSON.stringify(this.state.legoPart)
       if (this.props.isEditMode) {
@@ -46,12 +43,14 @@ export class LegoPartsCreateOrEditModal extends React.Component {
   }
 
   async createLegoPart(legoPartJSONString) {
-    console.log('createLegoPart')
-    this.service.createLegoPartFromAPI(legoPartJSONString)
+    try {
+      await this.service.createLegoPartFromAPI(legoPartJSONString)
+    } catch (error) {
+      throw error
+    }
   }
 
   async updateLegoPart(legoPartJSONString, legoPartId) {
-    console.log('updateLegoPart with id '+legoPartId)
     this.service.updateLegoPartFromAPI(legoPartJSONString, legoPartId)
   }
 
