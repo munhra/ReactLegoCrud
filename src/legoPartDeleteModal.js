@@ -1,42 +1,43 @@
 import { Toast, Button, Modal, Spinner, ToastContainer } from 'react-bootstrap'
 import React from 'react'
+import PropTypes from 'prop-types'
 
 export class LegoPartDeleteModal extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super()
     this.service = props.service
-    this.state = {isSpinnerVisible: false, showInfoToast: false, messageWhenDeletingLegoPart: 'Lego part deleted with success.'}
+    this.state = { isSpinnerVisible: false, showInfoToast: false, messageWhenDeletingLegoPart: 'Lego part deleted with success.' }
   }
 
-  handleClose() {
+  handleClose () {
     this.props.handleDeleteLegoPartClose()
   }
 
-  hideInfoToast() {
-    this.setState({showInfoToast: false})
+  hideInfoToast () {
+    this.setState({ showInfoToast: false })
     this.props.handleDeleteLegoPartSave()
   }
 
-  async handleDelete() {
+  async handleDelete () {
     try {
-      this.setState({isSpinnerVisible: true})
+      this.setState({ isSpinnerVisible: true })
       await this.service.deleteLegoPartFromAPI(this.props.legoPartToDelete.id)
-      this.setState({showInfoToast: true})
+      this.setState({ showInfoToast: true })
     } catch (error) {
-      this.setState({isSpinnerVisible: false, showInfoToast: true, messageWhenDeletingLegoPart: 'Error when deleting lego part.'})
+      this.setState({ isSpinnerVisible: false, showInfoToast: true, messageWhenDeletingLegoPart: 'Error when deleting lego part.' })
     }
   }
 
-  render() {
+  render () {
     let spinner
     let footer
     if (this.state.isSpinnerVisible) {
-      spinner = 
+      spinner =
       <Spinner animation='border' role='status'>
         <span className='visually-hidden'>Loading...</span>
       </Spinner>
     } else {
-      footer = 
+      footer =
       <Modal.Footer>
         <Button variant='secondary' onClick={() => this.handleClose()}>Cancel</Button>
         <Button variant='primary' onClick={() => this.handleDelete()}>Delete</Button>
@@ -48,7 +49,7 @@ export class LegoPartDeleteModal extends React.Component {
       <ToastContainer position='bottom-end'>
         <Toast onClose={() => this.hideInfoToast()} show={this.state.showInfoToast} delay={2000} autohide>
           <Toast.Header>
-            LegoPart 
+            LegoPart
           </Toast.Header>
           <Toast.Body>
             {this.state.messageWhenDeletingLegoPart}
@@ -61,11 +62,19 @@ export class LegoPartDeleteModal extends React.Component {
           {spinner}
         </Modal.Header>
         <Modal.Body>
-          <p> Are you sure to delete lego part "{this.props.legoPartToDelete.name}"</p>
+          <p> Are you sure to delete lego part with name: {this.props.legoPartToDelete.name} </p>
         </Modal.Body>
         {footer}
       </Modal>
     </>
     )
   }
+}
+
+LegoPartDeleteModal.propTypes = {
+  service: PropTypes.object,
+  handleDeleteLegoPartClose: PropTypes.func,
+  handleDeleteLegoPartSave: PropTypes.func,
+  legoPartToDelete: PropTypes.object,
+  isDeleteLegoPart: PropTypes.bool
 }

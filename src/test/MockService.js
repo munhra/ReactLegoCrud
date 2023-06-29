@@ -4,10 +4,12 @@ class MockService {
     name: 'Mock Lego Part Name',
     description: 'Mock Lego Part Description',
     part_number: '1234567',
-    quantity: 10,
+    quantity: '10',
     color: 'blue',
     image: 'part.jpg'
   }
+
+  static mockLegoParts = [MockService.mockLegoPart]
 
   isDeleteLegoPartFromAPISuccess = false
   isDeleteLegoPartFromAPIError = false
@@ -33,7 +35,7 @@ class MockService {
 
   async updateLegoPartFromAPI (legoPartJSONString, legoPartId) {
     if (this.isUpdateLegoPartFromAPIError) {
-      throw new Error('Server Error when createLegoPart')
+      throw new Error('Server error when updateLegoPart')
     } else {
       this.isUpdateLegoPartFromAPISuccess = true
       return this.mockLegoPartToEdit

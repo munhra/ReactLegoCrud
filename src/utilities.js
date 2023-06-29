@@ -1,3 +1,5 @@
+import { Service } from './service'
+
 class Utilities {
   sortLegoPartNumbers (legoParts) {
     legoParts.sort((p1, p2) => {
@@ -33,6 +35,17 @@ class Utilities {
       clonedLegoParts.push(legoPart)
     })
     return clonedLegoParts
+  }
+
+  async fetchAllLegoPartsFromAPI () {
+    const service = new Service()
+    try {
+      const legoParts = await service.getAllLegoPartsFromAPI()
+      this.sortLegoPartNumbers(legoParts)
+      return legoParts
+    } catch (error) {
+      return error
+    }
   }
 }
 

@@ -1,15 +1,16 @@
-import { Toast, Button, Modal, Form, Navbar, Table, Spinner, ToastContainer } from 'react-bootstrap';
-import React from 'react';
-import { Service } from './service';
+import { Button, Navbar } from 'react-bootstrap'
+import React from 'react'
 import { LegoPartsCreateOrEditModal } from './legoPartsCreateOrEditModal'
-import { LegoPartDeleteModal } from './legoPartDeleteModal';
+import { LegoPartDeleteModal } from './legoPartDeleteModal'
 import { LegoPartsTable } from './legoPartsTable'
-import { Utilities } from './utilities';
+import PropTypes from 'prop-types'
+import { Utilities } from './utilities'
 
 export class LegoPartsNavbar extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
-    this.state = {isAddLegoPart: false, isDeleteLegoParts: false}
+    this.service = props.service
+    this.state = { isAddLegoPart: false, isDeleteLegoParts: false }
 
     this.handleAddLegoPartClose = this.handleAddLegoPartClose.bind(this)
     this.handleAddLegoPartSave = this.handleAddLegoPartSave.bind(this)
@@ -18,43 +19,44 @@ export class LegoPartsNavbar extends React.Component {
     this.handleDeleteLegoPartSave = this.handleDeleteLegoPartSave.bind(this)
 
     this.handleEditLegoPartSave = this.handleEditLegoPartSave.bind(this)
+    this.utilities = new Utilities()
   }
 
-  deleteLegoParts() {
-    this.setState({isDeleteLegoParts: true})
+  deleteLegoParts () {
+    this.setState({ isDeleteLegoParts: true })
   }
 
-  addLegoPart() {
-    this.setState({isAddLegoPart: true})
+  addLegoPart () {
+    this.setState({ isAddLegoPart: true })
   }
 
-  handleAddLegoPartClose() {
-    this.setState({isAddLegoPart: false})
+  handleAddLegoPartClose () {
+    this.setState({ isAddLegoPart: false })
   }
 
   // maybe both methods handleAddLegoPartSave and handleEditLegoPartSave can be merged in one method called
   // updateLegoTable
 
-  async handleAddLegoPartSave() {
-    let legoParts = await fetchAllLegoPartsFromAPI()
+  async handleAddLegoPartSave () {
+    const legoParts = await this.utilities.fetchAllLegoPartsFromAPI()
     // implement error handling for this
-    this.setState({isAddLegoPart: false, legoParts: legoParts})
+    this.setState({ isAddLegoPart: false, legoParts: legoParts })
   }
 
-  async handleEditLegoPartSave() {
-    let legoParts = await fetchAllLegoPartsFromAPI()
+  async handleEditLegoPartSave () {
+    const legoParts = await this.utilities.fetchAllLegoPartsFromAPI()
     // implement error handling for this
     // i think that isAddLegoPart is not required
-    this.setState({isAddLegoPart: false, legoParts: legoParts})
+    this.setState({ isAddLegoPart: false, legoParts: legoParts })
   }
 
-  handleDeleteLegoPartClose() {
-    this.setState({isDeleteLegoParts: false})
+  handleDeleteLegoPartClose () {
+    this.setState({ isDeleteLegoParts: false })
   }
 
-  async handleDeleteLegoPartSave() {
-    let legoParts = await fetchAllLegoPartsFromAPI()
-    this.setState({isAddLegoPart: false, isDeleteLegoParts: false, legoParts: legoParts})
+  async handleDeleteLegoPartSave () {
+    const legoParts = await this.utilities.fetchAllLegoPartsFromAPI()
+    this.setState({ isAddLegoPart: false, isDeleteLegoParts: false, legoParts: legoParts })
   }
 
   render () {
@@ -62,8 +64,7 @@ export class LegoPartsNavbar extends React.Component {
     let deleteLegoPartModal
 
     if (this.state.isAddLegoPart) {
-      addLegoPartModal = <LegoPartsCreateOrEditModal
-                                                     service = {new Service()}
+      addLegoPartModal = <LegoPartsCreateOrEditModal service = {this.service}
                                                      showLegoPartForm = {this.state.isAddLegoPart}
                                                      handleAddLegoPartClose = {this.handleAddLegoPartClose}
                                                      handleAddLegoPartSave = {this.handleAddLegoPartSave}
@@ -77,8 +78,8 @@ export class LegoPartsNavbar extends React.Component {
                                                  handleDeleteLegoPartSave={this.handleDeleteLegoPartSave}
       />
     }
-    
-    return(
+
+    return (
       <>
       <Navbar className='navbar navbar-expand-lg bg-light'>
         <div className='container-fluid'>
@@ -95,8 +96,8 @@ export class LegoPartsNavbar extends React.Component {
       </Navbar>
       {addLegoPartModal}
       {deleteLegoPartModal}
-      <LegoPartsTable legoParts = {this.state.legoParts} 
-                      handleDeleteLegoPartSave = {this.handleDeleteLegoPartSave} 
+      <LegoPartsTable legoParts = {this.state.legoParts}
+                      handleDeleteLegoPartSave = {this.handleDeleteLegoPartSave}
                       handleEditLegoPartSave = {this.handleEditLegoPartSave}
         />
       </>
@@ -104,16 +105,6 @@ export class LegoPartsNavbar extends React.Component {
   }
 }
 
-export async function fetchAllLegoPartsFromAPI() {
-  let service = new Service()
-  let utilities = new Utilities()
-  try {
-    let legoParts = await service.getAllLegoPartsFromAPI()
-    utilities.sortLegoPartNumbers(legoParts)
-    console.log('fetchAllLegoPartsFromAPI success '+legoParts.length)
-    return legoParts
-  } catch (error) {
-    console.log('fetchAllLegoPartsFromAPI error')
-    return error
-  }
+LegoPartsNavbar.propTypes = {
+  service: PropTypes.object
 }

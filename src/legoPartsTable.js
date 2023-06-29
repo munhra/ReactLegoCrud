@@ -1,14 +1,15 @@
-import { Toast, Button, Modal, Form, Navbar, Table, Spinner, ToastContainer } from 'react-bootstrap';
-import { LegoPartDeleteModal } from './legoPartDeleteModal';
-import { LegoPartsCreateOrEditModal } from './legoPartsCreateOrEditModal';
-import React from 'react';
-import { Service } from './service';
-import { Utilities } from './utilities';
+import { Button, Form, Table } from 'react-bootstrap'
+import { LegoPartDeleteModal } from './legoPartDeleteModal'
+import { LegoPartsCreateOrEditModal } from './legoPartsCreateOrEditModal'
+import React from 'react'
+import { Service } from './service'
+import { Utilities } from './utilities'
+import PropTypes from 'prop-types'
 
 export class LegoPartsTable extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
-    this.state = {legoParts: [], legoPartToDelete: {}}
+    this.state = { legoParts: [], legoPartToDelete: {} }
     this.utilities = new Utilities()
 
     this.handleDeleteLegoPartClose = this.handleDeleteLegoPartClose.bind(this)
@@ -19,13 +20,13 @@ export class LegoPartsTable extends React.Component {
     this.handleEditLegoPartSave = this.handleEditLegoPartSave.bind(this)
   }
 
-  async componentDidMount() {
-    let legoParts = await fetchAllLegoPartsFromAPI()
+  async componentDidMount () {
+    const legoParts = await this.utilities.fetchAllLegoPartsFromAPI()
     // error handling needs to be implemented
-    this.setState({legoParts: legoParts})
+    this.setState({ legoParts: legoParts })
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps (nextProps, prevState) {
     if (nextProps.legoParts === undefined) {
       return null
     }
@@ -34,44 +35,42 @@ export class LegoPartsTable extends React.Component {
     }
   }
 
-  editLegoPart(legoPart) {
-    console.log('Edit lego part !! '+legoPart.name)
-    this.setState({isEditLegoPart: true, legoPartToEdit: legoPart})
+  editLegoPart (legoPart) {
+    this.setState({ isEditLegoPart: true, legoPartToEdit: legoPart })
   }
 
-  deleteLegoPart(legoPart) {
-    console.log('deleteLegoPart')
-    this.setState({isDeleteLegoPart: true, legoPartToDelete: legoPart})
+  deleteLegoPart (legoPart) {
+    this.setState({ isDeleteLegoPart: true, legoPartToDelete: legoPart })
   }
 
-  selectLegoPartOnClick(event) {
-    console.log('Select lego part on click !! '+event.target.checked)
+  selectLegoPartOnClick (event) {
+    console.log('Select lego part on click !! ' + event.target.checked)
   }
 
-  selectAllLegoPartsOnClick(event) {
-    console.log('Select all lego parts on click !! '+event.target.checked)
+  selectAllLegoPartsOnClick (event) {
+    console.log('Select all lego parts on click !! ' + event.target.checked)
   }
 
-  handleDeleteLegoPartClose() {
+  handleDeleteLegoPartClose () {
     console.log('handleDeleteLegoPartClose')
-    this.setState({isDeleteLegoPart: false})
+    this.setState({ isDeleteLegoPart: false })
   }
 
-  async handleDeleteLegoPartSave() {
-    this.setState({isDeleteLegoPart: false})
+  async handleDeleteLegoPartSave () {
+    this.setState({ isDeleteLegoPart: false })
     this.props.handleDeleteLegoPartSave()
   }
 
-  handleEditLegoPartClose() {
-    this.setState({isEditLegoPart: false})
+  handleEditLegoPartClose () {
+    this.setState({ isEditLegoPart: false })
   }
 
-  handleEditLegoPartSave() {
-    this.setState({isEditLegoPart: false})
+  handleEditLegoPartSave () {
+    this.setState({ isEditLegoPart: false })
     this.props.handleEditLegoPartSave()
   }
 
-  render() {
+  render () {
     let deleteLegoPartModal
     let editLegoPartModal
 
@@ -94,7 +93,7 @@ export class LegoPartsTable extends React.Component {
         legoPartToEdit = {this.state.legoPartToEdit}
       />
     }
-    return(
+    return (
       <>
       <Table className='table table-striped table-hover'>
         <thead>
@@ -113,7 +112,7 @@ export class LegoPartsTable extends React.Component {
           </tr>
         </thead>
         <tbody>
-          {this.state.legoParts.map(legoPart =>(
+          {this.state.legoParts.map(legoPart => (
             <tr key={legoPart.id}>
               <td><Form.Check onClick={event => this.selectLegoPartOnClick(event)}>
                 </Form.Check></td>
@@ -138,16 +137,9 @@ export class LegoPartsTable extends React.Component {
   }
 }
 
-export async function fetchAllLegoPartsFromAPI() {
-  let service = new Service()
-  let utilities = new Utilities()
-  try {
-    let legoParts = await service.getAllLegoPartsFromAPI()
-    utilities.sortLegoPartNumbers(legoParts)
-    console.log('fetchAllLegoPartsFromAPI success '+legoParts.length)
-    return legoParts
-  } catch (error) {
-    console.log('fetchAllLegoPartsFromAPI error')
-    return error
-  }
+LegoPartsTable.propTypes = {
+  service: PropTypes.object,
+  legoParts: PropTypes.array,
+  handleDeleteLegoPartSave: PropTypes.func,
+  handleEditLegoPartSave: PropTypes.func
 }

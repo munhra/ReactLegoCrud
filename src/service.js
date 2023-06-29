@@ -18,13 +18,12 @@ class Service {
   async createLegoPartFromAPI (legoPartJSONString) {
     const response = await fetch(productionURL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json','Accept': '*/*'},
+      headers: { 'Content-Type': 'application/json', Accept: '*/*' },
       mode: 'cors',
       body: legoPartJSONString
     })
     if (response.ok) {
       const createdLegoPart = await response.json()
-      console.log("createLegoPartFromAPI response -> "+createdLegoPart.name)
       return createdLegoPart
     } else {
       throw new Error('Server Error when createLegoPart')

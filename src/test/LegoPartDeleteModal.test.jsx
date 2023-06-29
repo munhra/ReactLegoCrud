@@ -10,7 +10,7 @@ it('LegoPartDeleteModal renders successfully', () => {
                               legoPartToDelete = {MockService.mockLegoPart}/>)
 
   const titleText = screen.getByText(/Delete Lego Part/)
-  const subTitleText = screen.getByText(/Are you sure to delete lego part "Mock Lego Part Name"/)
+  const subTitleText = screen.getByText(/Are you sure to delete lego part with name: Mock Lego Part Name/)
   expect(titleText).toBeInTheDocument()
   expect(subTitleText).toBeInTheDocument()
 })
