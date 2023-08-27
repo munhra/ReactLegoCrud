@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react'
 import { LegoPartsCreateOrEditModal } from '../legoPartsCreateOrEditModal'
 import { MockService } from './MockService'
 import userEvent from '@testing-library/user-event'
@@ -31,7 +31,6 @@ it('legoPartsCreateOrEditModal add mode renders successfully', async () => {
   const imageInput = screen.getByTestId(/inputImage/)
 
   expect(titleText).toBeInTheDocument()
-  
   expect(nameLabel).toBeInTheDocument()
   expect(nameInput).toBeInTheDocument()
   expect(descriptionLabel).toBeInTheDocument()
@@ -82,7 +81,6 @@ it('legoPartsCreateOrEditModal edit mode renders successfully', () => {
   const nameLabel = screen.getByText(/Name/)
   // include an expect to check the contents of the field
   // const nameField = screen.getByText(/Mock Lego Part Name/)
-  
   expect(titleText).toBeInTheDocument()
   expect(nameLabel).toBeInTheDocument()
   expect(inputName).toHaveValue("Mock Lego Part Name")
@@ -92,62 +90,105 @@ it('legoPartsCreateOrEditModal add part with success', async () => {
   const user = userEvent.setup()
   const mockedService = new MockService()
 
+  let isHandleAddLegoPartSaveCalled = false
+  const mockHandleAddLegoPartSave = function handleAddLegoPartSave () {
+    isHandleAddLegoPartSaveCalled = true
+  }
+
   render(<LegoPartsCreateOrEditModal service = {mockedService}
                                      showLegoPartForm = {true}
+                                     handleAddLegoPartSave = {mockHandleAddLegoPartSave}
                                      isEditMode = {false}/>)
 
   const saveChangesButton = screen.getByText('Save changes')
   expect(saveChangesButton).toBeInTheDocument()
   await user.click(saveChangesButton)
   expect(await mockedService.isCreateLegoPartFromAPISuccess).toEqual(true)
+
+  const infoToastMessage = screen.getByText('Lego part created with success.')
+  expect(infoToastMessage).toBeInTheDocument()
+  await waitFor(() => expect(isHandleAddLegoPartSaveCalled).toEqual(true), { timeout: 3000 })
 })
 
 it('legoPartsCreateOrEditModal add part with error', async () => {
   const user = userEvent.setup()
   const mockedService = new MockService()
+
+  let isHandleAddLegoPartSaveCalled = false
+  const mockHandleAddLegoPartSave = function handleAddLegoPartSave () {
+    isHandleAddLegoPartSaveCalled = true
+  }
+
   mockedService.isCreateLegoPartFromAPIError = true
   render(<LegoPartsCreateOrEditModal service = {mockedService}
                                      showLegoPartForm = {true}
+                                     handleAddLegoPartSave = {mockHandleAddLegoPartSave}
                                      isEditMode = {false}/>)
 
   const saveChangesButton = screen.getByText('Save changes')
   expect(saveChangesButton).toBeInTheDocument()
   await user.click(saveChangesButton)
+  expect(await mockedService.isCreateLegoPartFromAPISuccess).toEqual(false)
   const errorMessage = screen.getByText('Error when creating lego part.')
   expect(errorMessage).toBeInTheDocument()
+
+  const infoToastMessage = screen.getByText('Error when creating lego part.')
+  expect(infoToastMessage).toBeInTheDocument()
+  await waitFor(() => expect(isHandleAddLegoPartSaveCalled).toEqual(true), { timeout: 3000 })
 })
 
 it('legoPartsCreateOrEditModal edit part with success', async () => {
   const user = userEvent.setup()
   const mockedService = new MockService()
 
+  let isHandleAddLegoPartSaveCalled = false
+  const mockHandleAddLegoPartSave = function handleAddLegoPartSave () {
+    isHandleAddLegoPartSaveCalled = true
+  }
+
   render(<LegoPartsCreateOrEditModal service = {mockedService}
                                      legoPartToEdit = {MockService.mockLegoPart}
                                      showLegoPartForm = {true}
+                                     handleAddLegoPartSave = {mockHandleAddLegoPartSave}
                                      isEditMode = {true}/>)
 
   const saveChangesButton = screen.getByText('Save changes')
   expect(saveChangesButton).toBeInTheDocument()
   await user.click(saveChangesButton)
   expect(await mockedService.isUpdateLegoPartFromAPISuccess).toEqual(true)
+
+  const infoToastMessage = screen.getByText('Lego part edited with success.')
+  expect(infoToastMessage).toBeInTheDocument()
+  await waitFor(() => expect(isHandleAddLegoPartSaveCalled).toEqual(true), { timeout: 3000 })
 })
 
 it('legoPartsCreateOrEditModal edit part with error', async () => {
   const user = userEvent.setup()
   const mockedService = new MockService()
   mockedService.isUpdateLegoPartFromAPIError = true
-  
+
+  let isHandleAddLegoPartSaveCalled = false
+  const mockHandleAddLegoPartSave = function handleAddLegoPartSave () {
+    isHandleAddLegoPartSaveCalled = true
+  }
+
   render(<LegoPartsCreateOrEditModal service = {mockedService}
                                      legoPartToEdit = {MockService.mockLegoPart}
                                      showLegoPartForm = {true}
+                                     handleAddLegoPartSave = {mockHandleAddLegoPartSave}
                                      isEditMode = {true}/>)
 
   const saveChangesButton = screen.getByText('Save changes')
   expect(saveChangesButton).toBeInTheDocument()
   await user.click(saveChangesButton)
-  
+  expect(await mockedService.isUpdateLegoPartFromAPISuccess).toEqual(false)
+
   const errorMessage = screen.getByText('Error when editing lego part.')
   expect(errorMessage).toBeInTheDocument()
+
+  const infoToastMessage = screen.getByText('Error when editing lego part.')
+  expect(infoToastMessage).toBeInTheDocument()
+  await waitFor(() => expect(isHandleAddLegoPartSaveCalled).toEqual(true), { timeout: 3000 })
 })
 
 it('legoPartsCreateOrEditModal cancel add part', async () => {

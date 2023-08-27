@@ -31,12 +31,14 @@ class Service {
   }
 
   async updateLegoPartFromAPI (legoPartJSONString, legoPartId) {
+    console.log('###### ' + legoPartJSONString)
     const response = await fetch(`${productionURL}/${legoPartId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       mode: 'cors',
       body: legoPartJSONString
     })
+    console.log(response)
     if (response.ok) {
       const updatedLegoPart = await response.json()
       return updatedLegoPart

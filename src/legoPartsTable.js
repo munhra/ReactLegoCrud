@@ -2,20 +2,20 @@ import { Button, Form, Table } from 'react-bootstrap'
 import { LegoPartDeleteModal } from './legoPartDeleteModal'
 import { LegoPartsCreateOrEditModal } from './legoPartsCreateOrEditModal'
 import React from 'react'
-import { Service } from './service'
 import { Utilities } from './utilities'
 import PropTypes from 'prop-types'
 
 export class LegoPartsTable extends React.Component {
   constructor (props) {
     super(props)
-    this.state = { legoParts: [], legoPartToDelete: {} }
+    this.service = props.service
+    this.state = { legoParts: [], legoPartToDelete: {}, selectedLegoParts: [], selectAllLegoParts: false }
     this.utilities = new Utilities()
 
     this.handleDeleteLegoPartClose = this.handleDeleteLegoPartClose.bind(this)
     this.handleDeleteLegoPartSave = this.handleDeleteLegoPartSave.bind(this)
 
-    // I dont know if handleEditLegoPartClose is necessary
+    // I don't know if handleEditLegoPartClose is necessary
     this.handleEditLegoPartClose = this.handleEditLegoPartClose.bind(this)
     this.handleEditLegoPartSave = this.handleEditLegoPartSave.bind(this)
   }
@@ -23,7 +23,7 @@ export class LegoPartsTable extends React.Component {
   async componentDidMount () {
     const legoParts = await this.utilities.fetchAllLegoPartsFromAPI()
     // error handling needs to be implemented
-    this.setState({ legoParts: legoParts })
+    this.setState({ legoParts })
   }
 
   static getDerivedStateFromProps (nextProps, prevState) {
@@ -44,15 +44,40 @@ export class LegoPartsTable extends React.Component {
   }
 
   selectLegoPartOnClick (event) {
-    console.log('Select lego part on click !! ' + event.target.checked)
+    const legoPartId = event.target.id
+    if (event.target.checked) {
+      const selectedLegoPart = this.utilities.getLegoPartByID(legoPartId, this.state.legoParts)
+      this.state.selectedLegoParts.push(selectedLegoPart)
+    } else {
+      this.utilities.removeSelectedLegoPart(legoPartId, this.state.selectedLegoParts)
+    }
+    this.props.updateSelectedLegoParts(this.state.selectedLegoParts)
+    this.isSelectedLegoPart(event.target.id)
+  }
+
+  isSelectedLegoPart (legoPartId) {
+    // I think that it can be reduce to a one line logic
+    const filteredLegoPart = this.state.selectedLegoParts.filter(legoPart => legoPart.id === legoPartId)
+    if (filteredLegoPart[0]) {
+      return true
+    } else {
+      return false
+    }
   }
 
   selectAllLegoPartsOnClick (event) {
-    console.log('Select all lego parts on click !! ' + event.target.checked)
+    // maybe it is possible to simplify it to one line
+    if (event.target.checked) {
+      const selectAllLegoParts = this.utilities.cloneLegoParts(this.state.legoParts)
+      this.setState({ selectedLegoParts: selectAllLegoParts })
+      this.props.updateSelectedLegoParts(selectAllLegoParts)
+    } else {
+      this.setState({ selectedLegoParts: [] })
+      this.props.updateSelectedLegoParts([])
+    }
   }
 
   handleDeleteLegoPartClose () {
-    console.log('handleDeleteLegoPartClose')
     this.setState({ isDeleteLegoPart: false })
   }
 
@@ -76,7 +101,7 @@ export class LegoPartsTable extends React.Component {
 
     if (this.state.isDeleteLegoPart) {
       deleteLegoPartModal = <LegoPartDeleteModal
-        service = {new Service()}
+        service = {this.service}
         legoPartToDelete = {this.state.legoPartToDelete}
         isDeleteLegoPart = {this.state.isDeleteLegoPart}
         handleDeleteLegoPartClose = {this.handleDeleteLegoPartClose}
@@ -85,7 +110,7 @@ export class LegoPartsTable extends React.Component {
     }
     if (this.state.isEditLegoPart) {
       editLegoPartModal = <LegoPartsCreateOrEditModal
-        service = {new Service()}
+        service = {this.service}
         showLegoPartForm = {this.state.isEditLegoPart}
         handleAddLegoPartClose = {this.handleEditLegoPartClose}
         handleAddLegoPartSave = {this.handleEditLegoPartSave}
@@ -99,7 +124,7 @@ export class LegoPartsTable extends React.Component {
         <thead>
           <tr>
             <th>
-                <Form.Check onClick={event => this.selectAllLegoPartsOnClick(event)}>
+                <Form.Check data-testid='selectAllCheck' onClick={event => this.selectAllLegoPartsOnClick(event)}>
                 </Form.Check>
             </th>
             <th>Name</th>
@@ -114,8 +139,7 @@ export class LegoPartsTable extends React.Component {
         <tbody>
           {this.state.legoParts.map(legoPart => (
             <tr key={legoPart.id}>
-              <td><Form.Check onClick={event => this.selectLegoPartOnClick(event)}>
-                </Form.Check></td>
+              <td><Form.Check data-testid={'itemCheck_' + legoPart.id} checked={this.isSelectedLegoPart(legoPart.id)} id={legoPart.id} onChange={event => this.selectLegoPartOnClick(event)}></Form.Check></td>
               <td>{legoPart.name}</td>
               <td>{legoPart.description}</td>
               <td>{legoPart.part_number}</td>
@@ -124,7 +148,7 @@ export class LegoPartsTable extends React.Component {
               <td>{legoPart.image}</td>
               <td>
                 <Button variant='warning' size='sm' onClick={() => this.editLegoPart(legoPart)}>Edit</Button>
-                <Button variant='danger' size='sm' onClick={() => this.deleteLegoPart(legoPart)}>Delete</Button>
+                <Button data-testid={'itemDelete_' + legoPart.id} variant='danger' size='sm' onClick={() => this.deleteLegoPart(legoPart)}>Delete</Button>
               </td>
             </tr>
           ))}
@@ -138,8 +162,9 @@ export class LegoPartsTable extends React.Component {
 }
 
 LegoPartsTable.propTypes = {
-  service: PropTypes.object,
   legoParts: PropTypes.array,
   handleDeleteLegoPartSave: PropTypes.func,
-  handleEditLegoPartSave: PropTypes.func
+  handleEditLegoPartSave: PropTypes.func,
+  service: PropTypes.object,
+  updateSelectedLegoParts: PropTypes.func
 }

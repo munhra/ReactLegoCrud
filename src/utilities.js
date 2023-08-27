@@ -1,6 +1,7 @@
 import { Service } from './service'
 
 class Utilities {
+  static service = new Service()
   sortLegoPartNumbers (legoParts) {
     legoParts.sort((p1, p2) => {
       if (p1.name > p2.name) {
@@ -38,9 +39,8 @@ class Utilities {
   }
 
   async fetchAllLegoPartsFromAPI () {
-    const service = new Service()
     try {
-      const legoParts = await service.getAllLegoPartsFromAPI()
+      const legoParts = await Utilities.service.getAllLegoPartsFromAPI()
       this.sortLegoPartNumbers(legoParts)
       return legoParts
     } catch (error) {

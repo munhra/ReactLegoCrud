@@ -36,10 +36,8 @@ export class LegoPartsCreateOrEditModal extends React.Component {
       this.setState({ isSpinnerVisible: true })
       const legoPartJSONString = JSON.stringify(this.state.legoPart)
       if (this.props.isEditMode) {
-        // await this.updateLegoPart(legoPartJSONString, this.state.legoPart.id)
         await this.service.updateLegoPartFromAPI(legoPartJSONString, this.state.legoPart.id)
       } else {
-        // await this.createLegoPart(legoPartJSONString)
         await this.service.createLegoPartFromAPI(legoPartJSONString)
       }
       this.setState({ showInfoToast: true })
@@ -130,6 +128,6 @@ LegoPartsCreateOrEditModal.propTypes = {
   isEditMode: PropTypes.bool,
   legoPartToEdit: PropTypes.object,
   handleAddLegoPartClose: PropTypes.func,
-  handleAddLegoPartSave: PropTypes.func,
+  handleAddLegoPartSave: PropTypes.func, // as this function is called when editing it should have another name
   showLegoPartForm: PropTypes.bool
 }

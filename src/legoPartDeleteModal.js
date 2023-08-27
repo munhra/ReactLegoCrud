@@ -40,7 +40,7 @@ export class LegoPartDeleteModal extends React.Component {
       footer =
       <Modal.Footer>
         <Button variant='secondary' onClick={() => this.handleClose()}>Cancel</Button>
-        <Button variant='primary' onClick={() => this.handleDelete()}>Delete</Button>
+        <Button data-testid='deleteModalButton' variant='primary' onClick={() => this.handleDelete()}>Delete</Button>
     </Modal.Footer>
     }
 

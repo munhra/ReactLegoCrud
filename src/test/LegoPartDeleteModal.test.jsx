@@ -1,5 +1,5 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react'
+import React from 'react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { LegoPartDeleteModal } from '../legoPartDeleteModal'
 import { MockService } from './MockService'
 import userEvent from '@testing-library/user-event'
@@ -37,14 +37,24 @@ it('LegoPartDeleteModal delete with success', async () => {
   const user = userEvent.setup()
   const mockedService = new MockService()
 
+  let ishandleDeleteLegoPartSaveCalled = false
+  const mockHandleDeleteLegoPartSave = function handleDeleteLegoPartSave () {
+    ishandleDeleteLegoPartSaveCalled = true
+  }
+
   render(<LegoPartDeleteModal service = {mockedService}
                               isDeleteLegoPart={true}
+                              handleDeleteLegoPartSave = {mockHandleDeleteLegoPartSave}
                               legoPartToDelete = {MockService.mockLegoPart}/>)
 
   const deleteButton = screen.getByText('Delete')
   expect(deleteButton).toBeInTheDocument()
   await user.click(deleteButton)
   expect(await mockedService.isDeleteLegoPartFromAPISuccess).toEqual(true)
+
+  const infoToastMessage = screen.getByText('Lego part deleted with success.')
+  expect(infoToastMessage).toBeInTheDocument()
+  await waitFor(() => expect(ishandleDeleteLegoPartSaveCalled).toEqual(true), { timeout: 3000 })
 })
 
 it('LegoPartDeleteModal delete with error', async () => {
@@ -52,15 +62,24 @@ it('LegoPartDeleteModal delete with error', async () => {
   const mockedService = new MockService()
   mockedService.isDeleteLegoPartFromAPIError = true
 
+  let ishandleDeleteLegoPartSaveCalled = false
+  const mockHandleDeleteLegoPartSave = function handleDeleteLegoPartSave () {
+    ishandleDeleteLegoPartSaveCalled = true
+  }
+
   render(<LegoPartDeleteModal service = {mockedService}
                               isDeleteLegoPart={true}
+                              handleDeleteLegoPartSave = {mockHandleDeleteLegoPartSave}
                               legoPartToDelete = {MockService.mockLegoPart}/>)
 
   const deleteButton = screen.getByText('Delete')
   expect(deleteButton).toBeInTheDocument()
   await user.click(deleteButton)
-  // Error when deleting lego part.
   const errorMessage = screen.getByText('Error when deleting lego part.')
-  // expect(await mockedService.isDeleteLegoPartFromAPISuccess).toEqual(true)
+  expect(await mockedService.isDeleteLegoPartFromAPISuccess).toEqual(false)
   expect(errorMessage).toBeInTheDocument()
+
+  const infoToastMessage = screen.getByText('Error when deleting lego part.')
+  expect(infoToastMessage).toBeInTheDocument()
+  await waitFor(() => expect(ishandleDeleteLegoPartSaveCalled).toEqual(true), { timeout: 3000 })
 })

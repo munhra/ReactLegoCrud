@@ -9,7 +9,18 @@ class MockService {
     image: 'part.jpg'
   }
 
-  static mockLegoParts = [MockService.mockLegoPart]
+  static mockSelectedLegoPart = {
+    id: '2',
+    name: 'Selected Mock Lego Part Name',
+    description: 'Selected Mock Lego Part Description',
+    part_number: '1234567999',
+    quantity: '23',
+    color: 'red',
+    image: 'selectedpart.jpg'
+  }
+
+  static mockLegoParts = [MockService.mockLegoPart, MockService.mockSelectedLegoPart]
+  static mockSelectedLegoParts = [MockService.mockSelectedLegoPart]
 
   isDeleteLegoPartFromAPISuccess = false
   isDeleteLegoPartFromAPIError = false
@@ -20,8 +31,11 @@ class MockService {
   isUpdateLegoPartFromAPISuccess = false
   isUpdateLegoPartFromAPIError = false
 
+  isDeleteLegoPartsFromAPISuccess = false
+  isDeleteLegoPartsFromAPIError = false
+
   async getAllLegoPartsFromAPI () {
-   
+    return MockService.mockSelectedLegoParts
   }
 
   async createLegoPartFromAPI (legoPartJSONString) {
@@ -52,7 +66,11 @@ class MockService {
   }
 
   async deleteLegoPartsFromAPI (legoParts) {
-    
+    if (this.isDeleteLegoPartsFromAPIError) {
+      throw new Error('Server error when deleting lego parts.')
+    } else {
+      this.isDeleteLegoPartsFromAPISuccess = true
+    }
   }
 }
 

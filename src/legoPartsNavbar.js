@@ -1,7 +1,7 @@
 import { Button, Navbar } from 'react-bootstrap'
 import React from 'react'
 import { LegoPartsCreateOrEditModal } from './legoPartsCreateOrEditModal'
-import { LegoPartDeleteModal } from './legoPartDeleteModal'
+import { LegoPartDeleteSelectedModal } from './legoPartDeleteSelectedModal'
 import { LegoPartsTable } from './legoPartsTable'
 import PropTypes from 'prop-types'
 import { Utilities } from './utilities'
@@ -10,20 +10,21 @@ export class LegoPartsNavbar extends React.Component {
   constructor (props) {
     super(props)
     this.service = props.service
-    this.state = { isAddLegoPart: false, isDeleteLegoParts: false }
+    this.state = { isAddLegoPart: false, isDeleteSelectedLegoParts: false, isDeleteButtonDisabled: true, selectedLegoParts: [] }
 
     this.handleAddLegoPartClose = this.handleAddLegoPartClose.bind(this)
     this.handleAddLegoPartSave = this.handleAddLegoPartSave.bind(this)
 
-    this.handleDeleteLegoPartClose = this.handleDeleteLegoPartClose.bind(this)
-    this.handleDeleteLegoPartSave = this.handleDeleteLegoPartSave.bind(this)
+    this.handleDeleteSelectedLegoPartsClose = this.handleDeleteSelectedLegoPartsClose.bind(this)
+    this.handleDeleteSelectedLegoPartsSave = this.handleDeleteSelectedLegoPartsSave.bind(this)
 
     this.handleEditLegoPartSave = this.handleEditLegoPartSave.bind(this)
+    this.updateSelectedLegoParts = this.updateSelectedLegoParts.bind(this)
     this.utilities = new Utilities()
   }
 
-  deleteLegoParts () {
-    this.setState({ isDeleteLegoParts: true })
+  deleteSelectedLegoParts () {
+    this.setState({ isDeleteSelectedLegoParts: true })
   }
 
   addLegoPart () {
@@ -34,34 +35,39 @@ export class LegoPartsNavbar extends React.Component {
     this.setState({ isAddLegoPart: false })
   }
 
+  updateSelectedLegoParts (selectedLegoParts) {
+    // check what happen if no records are found
+    this.setState({ isDeleteButtonDisabled: selectedLegoParts.length === 0, selectedLegoParts })
+  }
+
   // maybe both methods handleAddLegoPartSave and handleEditLegoPartSave can be merged in one method called
   // updateLegoTable
 
   async handleAddLegoPartSave () {
     const legoParts = await this.utilities.fetchAllLegoPartsFromAPI()
     // implement error handling for this
-    this.setState({ isAddLegoPart: false, legoParts: legoParts })
+    this.setState({ isAddLegoPart: false, legoParts })
   }
 
   async handleEditLegoPartSave () {
     const legoParts = await this.utilities.fetchAllLegoPartsFromAPI()
     // implement error handling for this
     // i think that isAddLegoPart is not required
-    this.setState({ isAddLegoPart: false, legoParts: legoParts })
+    this.setState({ isAddLegoPart: false, legoParts })
   }
 
-  handleDeleteLegoPartClose () {
-    this.setState({ isDeleteLegoParts: false })
+  handleDeleteSelectedLegoPartsClose () {
+    this.setState({ isDeleteSelectedLegoParts: false })
   }
 
-  async handleDeleteLegoPartSave () {
+  async handleDeleteSelectedLegoPartsSave () {
     const legoParts = await this.utilities.fetchAllLegoPartsFromAPI()
-    this.setState({ isAddLegoPart: false, isDeleteLegoParts: false, legoParts: legoParts })
+    this.setState({ isAddLegoPart: false, isDeleteSelectedLegoParts: false, legoParts })
   }
 
   render () {
     let addLegoPartModal
-    let deleteLegoPartModal
+    let legoPartDeleteSelectedModal
 
     if (this.state.isAddLegoPart) {
       addLegoPartModal = <LegoPartsCreateOrEditModal service = {this.service}
@@ -72,10 +78,12 @@ export class LegoPartsNavbar extends React.Component {
       />
     }
 
-    if (this.state.isDeleteLegoParts) {
-      deleteLegoPartModal = <LegoPartDeleteModal isDeleteLegoPart={this.state.isDeleteLegoParts}
-                                                 handleDeleteLegoPartClose={this.handleDeleteLegoPartClose}
-                                                 handleDeleteLegoPartSave={this.handleDeleteLegoPartSave}
+    if (this.state.isDeleteSelectedLegoParts) {
+      legoPartDeleteSelectedModal = <LegoPartDeleteSelectedModal service = {this.service}
+                                                                 selectedLegoParts = {this.state.selectedLegoParts}
+                                                                 isDeleteSelectedLegoParts={this.state.isDeleteSelectedLegoParts}
+                                                                 handleDeleteSelectedLegoPartsClose={this.handleDeleteSelectedLegoPartsClose}
+                                                                 handleDeleteSelectedLegoPartsSave={this.handleDeleteSelectedLegoPartsSave}
       />
     }
 
@@ -88,17 +96,19 @@ export class LegoPartsNavbar extends React.Component {
           </Button>
           <div className='collapse navbar-collapse'>
             <div className='d-flex'>
-              <Button className='btn btn-danger ms-1' type='button' onClick={() => this.deleteLegoParts()}>Delete</Button>
+              <Button data-testid='navBarDeleteButton' disabled={this.state.isDeleteButtonDisabled} className='btn btn-danger ms-1' type='button' onClick={() => this.deleteSelectedLegoParts()}>Delete</Button>
               <Button className='btn btn-success ms-1' type='button' onClick={() => this.addLegoPart()}>Add New Lego Part</Button>
             </div>
           </div>
         </div>
       </Navbar>
       {addLegoPartModal}
-      {deleteLegoPartModal}
+      {legoPartDeleteSelectedModal}
       <LegoPartsTable legoParts = {this.state.legoParts}
-                      handleDeleteLegoPartSave = {this.handleDeleteLegoPartSave}
+                      service = {this.service}
+                      handleDeleteLegoPartSave = {this.handleDeleteSelectedLegoPartsSave}
                       handleEditLegoPartSave = {this.handleEditLegoPartSave}
+                      updateSelectedLegoParts = {this.updateSelectedLegoParts}
         />
       </>
     )
