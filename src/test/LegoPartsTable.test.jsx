@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { LegoPartsTable } from '../legoPartsTable'
 import { MockService } from './MockService'

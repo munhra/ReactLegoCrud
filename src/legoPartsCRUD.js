@@ -1,6 +1,6 @@
 import React from 'react'
-import { Service } from './service'
-import { LegoPartsNavbar } from './legoPartsNavbar'
+import { Service } from './service.js'
+import { LegoPartsNavbar } from './legoPartsNavbar.js'
 
 export class LegoPartsCRUD extends React.Component {
   render () {

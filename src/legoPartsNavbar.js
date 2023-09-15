@@ -1,10 +1,10 @@
 import { Button, Navbar } from 'react-bootstrap'
 import React from 'react'
-import { LegoPartsCreateOrEditModal } from './legoPartsCreateOrEditModal'
-import { LegoPartDeleteSelectedModal } from './legoPartDeleteSelectedModal'
-import { LegoPartsTable } from './legoPartsTable'
+import { LegoPartsCreateOrEditModal } from './legoPartsCreateOrEditModal.js'
+import { LegoPartDeleteSelectedModal } from './legoPartDeleteSelectedModal.js'
+import { LegoPartsTable } from './legoPartsTable.js'
 import PropTypes from 'prop-types'
-import { Utilities } from './utilities'
+import { Utilities } from './utilities.js'
 
 export class LegoPartsNavbar extends React.Component {
   constructor (props) {
@@ -97,7 +97,7 @@ export class LegoPartsNavbar extends React.Component {
           <div className='collapse navbar-collapse'>
             <div className='d-flex'>
               <Button data-testid='navBarDeleteButton' disabled={this.state.isDeleteButtonDisabled} className='btn btn-danger ms-1' type='button' onClick={() => this.deleteSelectedLegoParts()}>Delete</Button>
-              <Button className='btn btn-success ms-1' type='button' onClick={() => this.addLegoPart()}>Add New Lego Part</Button>
+              <Button id='openAddLegoPartModal' className='btn btn-success ms-1' type='button' onClick={() => this.addLegoPart()}>Add New Lego Part</Button>
             </div>
           </div>
         </div>

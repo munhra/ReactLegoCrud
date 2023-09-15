@@ -1,8 +1,8 @@
 import { Button, Form, Table } from 'react-bootstrap'
-import { LegoPartDeleteModal } from './legoPartDeleteModal'
-import { LegoPartsCreateOrEditModal } from './legoPartsCreateOrEditModal'
+import { LegoPartDeleteModal } from './legoPartDeleteModal.js'
+import { LegoPartsCreateOrEditModal } from './legoPartsCreateOrEditModal.js'
 import React from 'react'
-import { Utilities } from './utilities'
+import { Utilities } from './utilities.js'
 import PropTypes from 'prop-types'
 
 export class LegoPartsTable extends React.Component {

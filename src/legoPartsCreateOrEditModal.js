@@ -65,7 +65,7 @@ export class LegoPartsCreateOrEditModal extends React.Component {
       footer =
       <Modal.Footer>
         <Button variant='secondary' onClick={() => this.handleClose()}>Cancel</Button>
-        <Button variant='primary' onClick={() => this.handleSave()}>Save changes</Button>
+        <Button id='addLegoPartModalSave' variant='primary' onClick={() => this.handleSave()}>Save changes</Button>
       </Modal.Footer>
     }
 
@@ -82,27 +82,27 @@ export class LegoPartsCreateOrEditModal extends React.Component {
           <Modal.Body>
             <Form.Group controlId='name'>
               <Form.Label>Name</Form.Label>
-              <Form.Control type='text' data-testid="inputName" value={this.state.legoPart.name} onChange={event => this.handleChange(event)}/>
+              <Form.Control name='name' type='text' data-testid="inputName" value={this.state.legoPart.name} onChange={event => this.handleChange(event)}/>
             </Form.Group>
             <Form.Group controlId='description'>
               <Form.Label>Description</Form.Label>
-              <Form.Control type='text' data-testid="inputDescription" value={this.state.legoPart.description} onChange={event => this.handleChange(event)}/>
+              <Form.Control name='description' type='text' data-testid="inputDescription" value={this.state.legoPart.description} onChange={event => this.handleChange(event)}/>
             </Form.Group>
             <Form.Group controlId='part_number'>
               <Form.Label>Part Number</Form.Label>
-              <Form.Control type='text' data-testid="inputPart_number" value={this.state.legoPart.part_number} onChange={event => this.handleChange(event)}/>
+              <Form.Control name='part_number' type='text' data-testid="inputPart_number" value={this.state.legoPart.part_number} onChange={event => this.handleChange(event)}/>
             </Form.Group>
             <Form.Group controlId='quantity'>
               <Form.Label>Quantity</Form.Label>
-              <Form.Control type='text' data-testid="inputQuantity" value={this.state.legoPart.quantity} onChange={event => this.handleChange(event)}/>
+              <Form.Control name='quantity' type='text' data-testid="inputQuantity" value={this.state.legoPart.quantity} onChange={event => this.handleChange(event)}/>
             </Form.Group>
             <Form.Group controlId='color'>
               <Form.Label>Color</Form.Label>
-              <Form.Control type='text' data-testid="inputColor" value={this.state.legoPart.color} onChange={event => this.handleChange(event)}/>
+              <Form.Control name='color' type='text' data-testid="inputColor" value={this.state.legoPart.color} onChange={event => this.handleChange(event)}/>
             </Form.Group>
             <Form.Group controlId='image'>
               <Form.Label>Image</Form.Label>
-              <Form.Control type='text' data-testid="inputImage" value={this.state.legoPart.image} onChange={event => this.handleChange(event)}/>
+              <Form.Control name='image' type='text' data-testid="inputImage" value={this.state.legoPart.image} onChange={event => this.handleChange(event)}/>
             </Form.Group>
           </Modal.Body>
             {footer}

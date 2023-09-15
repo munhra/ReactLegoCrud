@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { LegoPartsCRUD } from './legoPartsCRUD'
+import { LegoPartsCRUD } from './legoPartsCRUD.js'
 import './index.css'
 
 // TODO split this file into others by component, or check for other approach
