@@ -1,6 +1,11 @@
 {
   "name": "lego-crud-react",
   "version": "0.1.0",
+  "standard": {
+    "globals": [
+      "describe"
+    ]
+  },
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
