@@ -1,9 +1,10 @@
-import React from 'react';
+/* global expect it */
+import React from 'react'
 import { render, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import { LegoPartsNavbar } from '../legoPartsNavbar'
 import { MockService } from './MockService'
 import userEvent from '@testing-library/user-event'
-import { Utilities } from '../utilities';
+import { Utilities } from '../utilities'
 
 it('LegoPartsNavbar renders successfully.', () => {
   render(<LegoPartsNavbar />)

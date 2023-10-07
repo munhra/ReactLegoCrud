@@ -1,3 +1,4 @@
+/* global expect it */
 import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { LegoPartDeleteModal } from '../legoPartDeleteModal'

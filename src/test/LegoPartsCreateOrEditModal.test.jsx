@@ -1,4 +1,5 @@
-import React from 'react';
+/* global expect it */
+import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import { LegoPartsCreateOrEditModal } from '../legoPartsCreateOrEditModal'
 import { MockService } from './MockService'

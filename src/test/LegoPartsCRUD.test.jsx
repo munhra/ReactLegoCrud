@@ -1,3 +1,4 @@
+/* global expect it */
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { LegoPartsCRUD } from '../legoPartsCRUD'
